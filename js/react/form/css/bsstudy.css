@@ -1,0 +1,403 @@
+/* --------------- studie styles --------------------------- */
+
+.bsstudy {
+    margin-top: 10px;
+    margin-bottom: 50px;
+    clear: both;
+}
+
+.bsstudy h1 {
+    background-color: #82A721;
+    color: white;
+    padding: 5px;
+    margin: 0; 
+    margin-bottom: 0px;
+    border-radius: 6px 6px 0px 0px;
+}
+
+.bsstudy table {
+    border-collapse: collapse;
+    font-size: 13px;
+}
+
+.bsstudy thead {
+    background-color: #e0e0e0;
+}
+
+.bsstudy  td,
+.bsstudy  th {
+    border: 1px solid #aaa;
+    padding: 2px;
+}
+
+.bsstudy button[type="submit"] {
+    margin-top: 10px;
+    margin-left: 305px;
+}
+
+.bsstudy select,
+.bsstudy input,
+.bsstudy textarea {
+    background-color: #f0f0f0;
+    border: 1px solid #c0c0c0;
+}
+
+.bsstudy textarea {
+    width: 380px;
+    height: 100px;
+}
+
+.bsstudy label {
+    width: 300px;
+    text-align: right;
+    display: inline-block;
+    vertical-align: top;
+    margin-right: 5px;
+    /*margin-bottom: 10px;*/
+}
+
+.bsstudy .filter {
+    margin-bottom: 5px;
+}
+
+.bsstudy .filter span {
+    padding-right: 3px;
+}
+
+.bsstudy .filter i {
+    padding-left: 3px;
+}
+
+.bsstudy .logout {
+    cursor: pointer
+}
+
+.bsstudy .home-menu-item {
+    width: 300px;
+    text-align: center;
+    padding: 10px;
+    background-color: #82A721;
+    display: block;
+    margin-bottom: 10px;
+    margin-left: auto;
+    margin-right: auto;
+    color: white;
+    text-decoration: none;
+    cursor: pointer;
+    border: 1px solid gray;
+}
+
+/* ---- menu ------------------- */
+
+.bs-menu {
+    /*overflow: auto;*/
+    background-color: #D2F771;
+}
+
+.bs-submenu {
+    position: absolute;
+    top: 22px;
+    left: 0px;
+    background-color: #D2F771;
+}
+
+.bs-menu-item {
+    position: relative;
+    display: inline-block;
+    padding: 4px 10px;
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+.bs-menu-item:hover {
+    background-color: #f2ff91;
+}
+
+.bs-menu-item .bs-menu-item {
+    min-width: 150px;
+}
+
+.bs-submenu .bs-menu-item {
+    display: block;
+}
+
+/* ----------------------------- */
+
+.bsstudy .content {
+    margin-top: 5px;
+}
+
+.bsstudy .login-form {
+    margin-top: 40px;
+}
+
+.bsstudy .user-home {
+    overflow: auto;
+}
+
+.bsstudy .user-home .week-reports {
+    overflow: auto;
+}
+
+.bsstudy .week-reports .weeks,
+.bsstudy .week-reports .week-report,
+.bsstudy .week-reports .week-report-form  {
+    float: left;
+}
+
+.bsstudy .week-report  {
+    margin-left: 20px;
+}
+
+.bsstudy .week-report label,
+.bsstudy .week-report-form label {
+    width: 200px;
+}
+
+.bsstudy .week-report-form button[type="submit"] {
+    margin-left: 205px;
+}
+
+.bsstudy .week-report h2,
+.bsstudy .week-report-form h2 {
+    margin-top: 0px;
+    margin-left: 205px;
+}
+
+.bsstudy .week-reports td.status {
+    text-align: center;
+}
+
+.bsstudy .week-reports td.status:hover {
+    background-color: #f2ff91;
+}
+
+.bsstudy .user-info {
+    width: auto;
+    padding: 5px;
+    display: block;
+    margin-bottom: 10px;
+    margin-left: auto;
+    margin-right: auto;
+    border-bottom: 1px solid #ddd;
+}
+
+.bsstudy .register-link {
+    display: block;
+    margin-left: 310px;
+    margin-top: 20px;
+}
+
+.bsstudy .user-info div {
+    display: inline-block;
+}
+
+.bsstudy .user-info div.right {
+    float: right;
+}
+
+.bsstudy .rf-Label span {
+    display: block;
+}
+
+
+.bsstudy .dump-item {
+    margin-bottom: 5px;
+}
+
+.bsstudy .rf-Field,
+.bsstudy .rf-RepeatingFieldset,
+.bsstudy .commented-bool-fieldset {
+    padding-top: 5px;
+    padding-bottom: 5px;
+    margin-bottom: 6px;
+}
+
+.bsstudy .commented-number-fieldset .rf-Field.disabled,
+.bsstudy .commented-bool-fieldset .rf-Field.disabled {
+    display: none;
+}
+
+.bsstudy .rf-RepeatingFieldset__item {
+
+}
+
+.bsstudy .rf-RepeatingFieldset__child,
+.bsstudy .rf-RepeatingFieldset__remove {
+    margin-right: 5px;
+}
+
+.bsstudy .rf-RepeatingFieldset__items,
+.bsstudy .rf-RepeatingFieldset__item .rf-Field,
+.bsstudy .rf-RepeatingFieldset__item button {
+    display: inline-block;
+}
+
+.bsstudy .commented-bool-fieldset .rf-Field {
+    display: inline-block;
+    margin-right: 5px;
+}
+
+.bsstudy .week-number-fieldset .rf-Field  {
+    display: inline-block;
+    margin-right: 5px;
+}
+
+.bsstudy .week-number-fieldset .rf-Field select {
+        width: 50px;
+}
+
+.bsstudy .week-days {
+    display: inline-block;
+}
+
+.bsstudy .week-days div {
+    font-weight: bold;
+    display: inline-block;
+    width: 55px;
+    border-bottom: 1px solid gray;
+}
+
+.bsstudy .rf-StaticText {
+    display: inline-block;
+    width: 375px;
+    padding: 3px;
+    font-weight: bold;
+}
+
+.bsstudy .rf-StaticText.info-o-podavani {
+    background-color: #ffd6ac;
+}
+
+.bsstudy .rf-StaticText.obtize-po-podani {
+    background-color: #ffffad;
+}
+
+.bsstudy .rf-StaticText.priznaky-onemocneni {
+    background-color: #9bcdff;
+}
+
+.bsstudy .rf-StaticText.antibiotika {
+    background-color: #ffb1b1;
+}
+
+.bsstudy .rf-StaticText.hospitalizace {
+    background-color: #b9ffb9;
+}
+
+.bsstudy .commented-bool-fieldset .rf-Field {
+    display: inline-block;
+    margin-right: 5px;
+}
+
+.bsstudy .rf-Field--required input,
+.bsstudy .rf-Field--required  select {
+    border-right: 3px solid #4af; 
+}
+
+.bsstudy .rf-Field--invalid input,
+.bsstudy .rf-Field--invalid select {
+    background-color: #fcc;
+}
+
+.bsstudy .rf-Message{
+    font-style: italic;
+    padding: 5px;
+}
+
+.bsstudy .rf-Hint{
+    font-size: 11px;
+    font-style: italic;
+}
+
+.bsstudy .message-box {
+    padding: 15px 10px;
+    margin-top: 10px;
+    margin-bottom: 10px;
+    background-color: #e0ffe0;
+    border: 1px solid #ddd;
+}
+
+.bsstudy .komentar {
+    width: 550px;
+}
+
+.bsstudy .komentar input,
+.bsstudy .pocet select,
+.bsstudy .odpoved select {
+    width: 100%;
+}
+
+.bsstudy .pocet,
+.bsstudy .odpoved {
+    width: 50px;
+}
+
+.bsstudy .manage .users {
+    height: 200px;
+    overflow: auto;
+    resize: vertical;
+    border-bottom: 1px solid #d0d0d0;
+}
+
+.bsstudy .manage table {
+    table-layout: fixed;
+}
+
+.bsstudy .manage tr:hover {
+    background-color: #f0f0f0;
+}
+
+.bsstudy .manage td {
+    white-space: nowrap;
+}
+
+.bsstudy .manage th.status,
+.bsstudy .manage td.status {
+    overflow: hidden;
+    width: 34px; /* Important */
+    min-width: 34px; /* Important */
+    max-width: 34px; /* Important */
+    text-align: center;
+}
+
+.bsstudy .manage td.user {
+    overflow: hidden;
+    width; 100px;
+    max-width; 100px;
+    min-width; 100px;
+    cursor: pointer;
+}
+
+.bsstudy .manage td.user.active,
+.bsstudy .manage td.status.exists.active {
+    background-color: #f55;
+}
+
+.bsstudy td.status {
+    cursor: pointer;
+}
+
+.bsstudy td.status.exists {
+    background-color: #D2F771;
+}
+
+.bsstudy .manage tr.active {
+    /*background-color: #e0ffe0;*/
+    background-color: #fcc;
+} 
+
+.bsstudy .preformatted {
+    background-color: #e0e0e0;
+    font-family: monospace;
+    font-size: 10px;
+    white-space: pre;
+    padding: 5px;
+}
+
+
+.bsstudy .content .answer {
+    display: inline-block;
+    width: 50px;
+    margin-right: 5px;
+}
