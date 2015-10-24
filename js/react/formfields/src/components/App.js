@@ -2,6 +2,7 @@ import React from 'react';
 import Input from 'components/Input';
 import WeekNumber from 'components/WeekNumber';
 import Form from 'components/Form';
+import FormFields from 'components/FormFields';
 
 function validate(value) {
     return value.length > 0
@@ -18,22 +19,45 @@ export default class App extends React.Component{
         }
     }
 
+    componentDidMount() {
+        this.setState({
+            dirty: this.refs.formfields.isDirty(),
+            changed: this.refs.formfields.isChanged()
+        });
+    }
+
     render() {
         return (
             <div>
                 <form onSubmit={this._onSubmit.bind(this)}>
-                    <Form ref="form" onChange={this.onFormChange}>
-                        <input id="jmeno" label="Jmeno" default="Michal" validator={validate} />
-                        <input id="prijmeni" label="Prijmeni" default="Nezerka" />
-                        <Input id="titul" label="Titul" default="Title" />
-                        <select id="age" label="Vek" default="1">
+                    <FormFields ref="formfields" onChange={this.onFormChange}>
+                        <input
+                            id="name"
+                            label="First Name"
+                            default="Rob"
+                            validator={validate} />
+                        <input
+                            id="surname"
+                            label="Surname"
+                            default=""
+                            validator={validate} />
+                        <select id="age" label="Age" default="1">
                             <option value="1">1</option>
                             <option value="2">2</option>
                             <option value="3">3</option>
                         </select>
-                        <WeekNumber id="pocet" label="Pocet" default={[5, 10]}/>
-                    </Form>
-                    <button>Odeslat</button>
+                        <WeekNumber id="count" label="Count" default={[5, 10]}/>
+                    </FormFields>
+                    <button
+                        disabled={this.state.dirty || !this.state.changed}
+                        onClick={this.onSend}>
+                            Send
+                    </button>
+                    <button
+                        disabled={this.state.dirty || !this.state.changed}
+                        onClick={this.onReset}>
+                        Reset
+                    </button>
                     <p>Dirty: {this.state.dirty && "yes" || "no"}</p>
                     <p>Changed: {this.state.changed && "yes" || "no"}</p>
                     {this.state.dataLive && <div className="preformatted">{this.state.dataLive}</div>}
@@ -41,6 +65,17 @@ export default class App extends React.Component{
                 </form>
             </div>
         )
+    }
+
+    onSend = (e) => {
+        e.preventDefault();
+        console.log('onSend');
+    }
+
+    onReset = (e) => {
+        console.log('onReset');
+        e.preventDefault();
+        this.refs.formfields.reset();
     }
 
     onFormChange = (data, changed, dirty) => {
@@ -53,6 +88,7 @@ export default class App extends React.Component{
     }
 
     _onSubmit(e) {
+        console.log('_onSubmit');
         e.preventDefault()
         //console.log('form submit')
         this.setState({

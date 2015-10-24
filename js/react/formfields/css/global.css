@@ -1,6 +1,10 @@
 
-.form-row {
+.form-fields-row {
     margin-bottom: 5px;
+}
+
+.form-fields-row.invalid input {
+    background-color: #fdd;
 }
 
 label {
