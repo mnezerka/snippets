@@ -1,7 +1,6 @@
 import React from 'react';
 import Input from 'components/Input';
 import WeekNumber from 'components/WeekNumber';
-import Form from 'components/Form';
 import FormFields from 'components/FormFields';
 
 function validate(value) {
@@ -46,7 +45,10 @@ export default class App extends React.Component{
                             <option value="2">2</option>
                             <option value="3">3</option>
                         </select>
-                        <WeekNumber id="count" label="Count" default={[5, 10]}/>
+                        <WeekNumber
+                            id="count"
+                            label="Count"
+                            default={[5, 10]}/>
                     </FormFields>
                     <button
                         disabled={this.state.dirty || !this.state.changed}

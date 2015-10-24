@@ -54,8 +54,14 @@ import classnames from  'classnames';
 
  */ 
 
-export default class FormFields extends React.Component {
+function clone(val) {
+    if (val === undefined || val === null)
+        return val 
 
+    return JSON.parse(JSON.stringify(val));
+}
+
+export default class FormFields extends React.Component {
     static propTypes = {
         onChange: React.PropTypes.func,
         children: React.PropTypes.node,
@@ -81,13 +87,10 @@ export default class FormFields extends React.Component {
     
     reset() {
         for (let key in this.state.values) {
-            let value = this.state.values[key].default;
-            // Validation shall be also extracted
-            if (typeof(this.state.values[key].validator) === 'function') {
-                this.state.values[key].valid = this.state.values[key].validator(value)
-            }
-            this.state.values[key].value = value;
+            this.state.values[key].value = clone(this.state.values[key].default);
+            this._updateValueValidation(this.state.values[key]); 
         }
+       
         let changedFlag = false;
         let dirtyFlag = this._evaluateDirty(this.state.values);
         this.setState({
@@ -99,16 +102,18 @@ export default class FormFields extends React.Component {
         this.props.onChange(this.getValues(), changedFlag, dirtyFlag);
     }
 
+    // prepare list of values from React children list
     _getChildrenValues(children) {
-        // prepare list of values from list of children
         let values = {}
         React.Children.forEach(children, (child) => {
             values[child.props.id] = {
-                value: child.props.default,
-                default: child.props.default,
-                valid: child.props.validator ? child.props.validator(child.props.default) : true,
+                value: clone(child.props.default),
+                default: clone(child.props.default),
+                valid: true, 
                 validator: child.props.validator || null,
             }
+
+            this._updateValueValidation(values[child.props.id]);
         })
 
         return values
@@ -145,12 +150,9 @@ export default class FormFields extends React.Component {
         let nextState = Object.assign({}, this.state)
         let nextValues = nextState.values
         let nextValue = nextValues[id]
-        nextValue.value = value
+        nextValue.value = clone(value)
 
-        // validation of new value
-        if (typeof(nextValue.validator) === 'function') {
-            nextValue.valid = nextValue.validator(value)
-        }
+        this._updateValueValidation(nextValue);
 
         // check if global dirty state have changed 
         nextState.dirty = this._evaluateDirty(nextValues);
@@ -162,6 +164,12 @@ export default class FormFields extends React.Component {
         this.setState(nextState)
 
         this.props.onChange(this.getValues(nextValues), nextState.changed, nextState.dirty)
+    }
+
+    _updateValueValidation(value) {
+        if (typeof(value.validator) === 'function') {
+            value.valid = value.validator(value.value)
+        }
     }
 
     _evaluateDirty(values) {

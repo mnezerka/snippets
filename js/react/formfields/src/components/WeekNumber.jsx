@@ -8,11 +8,8 @@ export default class WeekNumber extends React.Component {
     }
 
     _handleChange(index, value) {
-        //console.log('change', index, event.target.value)
-        console.log('change', index, value)
-        //this.props.onChange(event.target.value);
         var newValue = this.props.value
-        newValue[index] = value
+        newValue[index] = parseInt(value)
         this.props.onChange(newValue)
     }
 
@@ -27,12 +24,5 @@ export default class WeekNumber extends React.Component {
                 <Input value={this.props.value[1]} onChange={this._handleChange.bind(this, 1)}/>
             </div>
         );
-    }
-}
-
-Input.defaultProps = {
-    value: ['', ''],
-    onChange: (value) => {
-        console.log(value);
     }
 }
