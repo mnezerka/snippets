@@ -1,5 +1,4 @@
 import React from 'react';
-import Input from 'components/Input';
 import WeekNumber from 'components/WeekNumber';
 import FormFields from 'components/FormFields';
 
@@ -14,7 +13,8 @@ export default class App extends React.Component{
             dataLive: null,
             dataSubmitted: null,
             dirty: false,
-            changed: false
+            changed: false,
+            dynamicCount: 0,
         }
     }
 
@@ -26,29 +26,45 @@ export default class App extends React.Component{
     }
 
     render() {
+        /*
+                        <WeekNumber
+                            fieldId="count"
+                            label="Count"
+                            default={[5, 10]}/>
+        */
+        var dynamic = [];
+        for (let i = 0; i < this.state.dynamicCount; i++) {
+            dynamic.push(
+                <input
+                    key={i}
+                    fieldId={'dyn-att-' + i}
+                    label={'Dynamic ' + i}
+                    default={'value' + i} />
+            );
+        }
+
         return (
             <div>
                 <form onSubmit={this._onSubmit.bind(this)}>
                     <FormFields ref="formfields" onChange={this.onFormChange}>
                         <input
-                            id="name"
+                            fieldId="name"
                             label="First Name"
                             default="Rob"
                             validator={validate} />
                         <input
-                            id="surname"
+                            fieldId="surname"
                             label="Surname"
-                            default=""
+                            default="Ickes"
                             validator={validate} />
-                        <select id="age" label="Age" default="1">
+                        <select fieldId="age" label="Age" default="1">
                             <option value="1">1</option>
                             <option value="2">2</option>
                             <option value="3">3</option>
                         </select>
-                        <WeekNumber
-                            id="count"
-                            label="Count"
-                            default={[5, 10]}/>
+                        {this.state.dynamicCount > 0 && <div>Dynamic section</div>}
+                        {this.state.dynamicCount > 0 && <div>{dynamic}</div>}
+
                     </FormFields>
                     <button
                         disabled={this.state.dirty || !this.state.changed}
@@ -60,15 +76,28 @@ export default class App extends React.Component{
                         onClick={this.onReset}>
                         Reset
                     </button>
-                    <p>Dirty: {this.state.dirty && "yes" || "no"}</p>
-                    <p>Changed: {this.state.changed && "yes" || "no"}</p>
+                    <button
+                        onClick={this.onModify}>
+                        ModifyForm 
+                    </button>
+
+                    <p>Dirty: {this.state.dirty && 'yes' || 'no'}</p>
+                    <p>Changed: {this.state.changed && 'yes' || 'no'}</p>
+                    <p>Dynamic count: {this.state.dynamicCount}</p>
                     {this.state.dataLive && <div className="preformatted">{this.state.dataLive}</div>}
                     {this.state.dataSubmitted && <div className="preformatted">{this.state.dataSubmitted}</div>}
                 </form>
             </div>
         )
     }
-
+    /*
+                        {this.state.dynamicCount > 0 &&  false &&
+                            <input
+                                id="dynamic attribute"
+                                label="Dynamic attribute"
+                                default="Dyn" />
+                        }
+    */ 
     onSend = (e) => {
         e.preventDefault();
         console.log('onSend');
@@ -78,6 +107,13 @@ export default class App extends React.Component{
         console.log('onReset');
         e.preventDefault();
         this.refs.formfields.reset();
+    }
+
+    onModify = (e) => {
+        console.log('onModify');
+        e.preventDefault();
+        //this.refs.formfields.reset();
+        this.setState({dynamicCount: this.state.dynamicCount + 1});
     }
 
     onFormChange = (data, changed, dirty) => {

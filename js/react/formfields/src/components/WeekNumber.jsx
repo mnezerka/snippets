@@ -2,6 +2,16 @@ import React from 'react';
 import Input from 'components/Input';
 
 export default class WeekNumber extends React.Component {
+    static propTypes = {
+        onChange: React.PropTypes.func,
+        value: React.PropTypes.any,
+    }
+
+    static defaultProps = {
+        onChange: () => {},
+        value: [0, 0]
+    }
+
     constructor(props) {
         super(props);
         this.compare.bind(this)
@@ -14,7 +24,7 @@ export default class WeekNumber extends React.Component {
     }
 
     compare(a, b) {
-        return (a[0] == b[0] && a[1] == b[1])
+        return (a[0] === b[0] && a[1] === b[1])
     }
 
     render() {
