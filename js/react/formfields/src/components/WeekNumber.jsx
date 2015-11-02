@@ -2,22 +2,29 @@ import React from 'react';
 import Input from 'components/Input';
 
 export default class WeekNumber extends React.Component {
+    static propTypes = {
+        onChange: React.PropTypes.func,
+        value: React.PropTypes.any,
+    }
+
+    static defaultProps = {
+        onChange: () => {},
+        value: [0, 0]
+    }
+
     constructor(props) {
         super(props);
         this.compare.bind(this)
     }
 
     _handleChange(index, value) {
-        //console.log('change', index, event.target.value)
-        console.log('change', index, value)
-        //this.props.onChange(event.target.value);
         var newValue = this.props.value
-        newValue[index] = value
+        newValue[index] = parseInt(value)
         this.props.onChange(newValue)
     }
 
     compare(a, b) {
-        return (a[0] == b[0] && a[1] == b[1])
+        return (a[0] === b[0] && a[1] === b[1])
     }
 
     render() {
@@ -27,12 +34,5 @@ export default class WeekNumber extends React.Component {
                 <Input value={this.props.value[1]} onChange={this._handleChange.bind(this, 1)}/>
             </div>
         );
-    }
-}
-
-Input.defaultProps = {
-    value: ['', ''],
-    onChange: (value) => {
-        console.log(value);
     }
 }

@@ -1,0 +1,38 @@
+body {
+    background-color: #666;
+    color: #bbb;
+}
+
+input, select {
+    color: #000;
+    background-color: #aaa;
+    border: 1px solid #333;
+    padding: 2px;
+}
+
+.form-fields-row {
+    margin-bottom: 5px;
+}
+
+.form-fields-row.invalid input {
+    background-color: #fdd;
+}
+
+label {
+    display: inline-block;
+    width: 300px;
+    text-align: right;
+    margin-right: 4px;
+}
+
+.input-field, .week-number {
+    display: inline-block;
+}
+
+.preformatted {
+    background-color: #000;
+    font-family: monospace;
+    white-space: pre;
+    padding: 5px;
+    color: #0f0;
+}
