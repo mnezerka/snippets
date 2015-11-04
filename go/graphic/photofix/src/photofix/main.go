@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-    "golang.org/x/image/tiff"
+    _ "golang.org/x/image/tiff"
 	"image"
 	"image/color"
 	"image/draw"
@@ -48,36 +48,44 @@ func fixLineError(img draw.Image) {
 }
 
 func main() {
-    if len(os.Args) != 2 {
-        fmt.Println("No image to be processed")
+    if len(os.Args) < 2 {
+        fmt.Println("No images to be processed")
         return
     }
 
-    if _, err := os.Stat(os.Args[1]); os.IsNotExist(err) {
-        fmt.Println("No such file:", os.Args[1])
-        return
+    for i := 1; i < len(os.Args); i++ {
+        filePath := os.Args[i]
+
+        if _, err := os.Stat(filePath); os.IsNotExist(err) {
+            fmt.Println("No such file:", filePath)
+            continue
+        }
+
+        var fileName = filepath.Base(filePath)
+        var fileExt = filepath.Ext(fileName)
+        var fileNameRaw= strings.TrimSuffix(fileName, fileExt)
+        var fileNameFix = fileNameRaw + "_fix.png"
+        var filePathFix = filepath.Join(filepath.Dir(filePath), fileNameFix)
+
+        if fileExt != ".tif" && fileExt != ".tiff" && fileExt != ".png" {
+            fmt.Println("Invalid file format", fileExt);
+            return
+        }
+
+        image := loadImage(filePath)
+
+        fmt.Printf("Fixing %s -> %s ... ", fileName, fileNameFix)
+
+        processImage(image)
+
+        saveImage(image, filePathFix)
+
+        fmt.Printf("done.\n")
     }
-
-    var basename = filepath.Base(os.Args[1])
-    var fileExt = filepath.Ext(basename)
-    var name = strings.TrimSuffix(basename, fileExt)
-    var finalPath = filepath.Join(filepath.Dir(os.Args[1]), name + "_fix.png")
-
-    if fileExt == ".png" {
-        loadImagePng(os.Args[1])
-    } else if fileExt == ".tif" || fileExt == ".tiff" {
-        loadImageTiff(os.Args[1])
-    } else {
-        fmt.Println("Invalid file format", fileExt);
-        return
-    }
-
-    processImage(os.Args[1], finalPath)
 }
 
-func loadImagePng(path) {
-	// Decode the JPEG data.
-	reader, err := os.Open(pathFrom)
+func loadImage(path string) *image.Image {
+	reader, err := os.Open(path)
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -86,42 +94,29 @@ func loadImagePng(path) {
 	if err != nil {
 		fmt.Println(err)
 	}
+    return &m
 }
 
-func loadImageTiff(path) {
-
+func saveImage(image *image.Image, path string) {
+	toimg, _ := os.Create(path)
+	defer toimg.Close()
+	png.Encode(toimg, *image)
 }
 
+func processImage(image *image.Image) (*draw.Image, error) {
 
-func processImage(pathFrom string, pathTo string) {
-    fmt.Printf("Fixing %s -> %s\n", pathFrom, pathTo)
-
-	// Decode the JPEG data.
-	reader, err := os.Open(pathFrom)
-	if err != nil {
-		fmt.Println(err)
-	}
-	defer reader.Close()
-	m, _, err := image.Decode(reader)
-	if err != nil {
-		fmt.Println(err)
-	}
-
-     bounds := m.Bounds()
+    bounds := (*image).Bounds()
 
     if bounds.Max.X != 3008 || bounds.Max.Y != 2000 {
         fmt.Println("Invalid image dimensions (%d, %d)", bounds.Max.X, bounds.Max.Y);
-        return;
+        return nil, fmt.Errorf("Invalid image dimensions (%d, %d)", bounds.Max.X, bounds.Max.Y);
+
     }
 
-
 	// make image writeable
-	newImage := CloneToRGBA(m)
+	newImage := CloneToRGBA(*image)
 
 	fixLineError(newImage)
 
-	// save image
-	toimg, _ := os.Create(pathTo)
-	defer toimg.Close()
-	png.Encode(toimg, newImage)
+    return &newImage, nil
 }
