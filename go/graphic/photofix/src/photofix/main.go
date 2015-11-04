@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+    "golang.org/x/image/tiff"
 	"image"
 	"image/color"
 	"image/draw"
@@ -57,17 +58,40 @@ func main() {
         return
     }
 
-    if filepath.Ext(os.Args[1]) != ".png" {
-        fmt.Println("Invalid image extension");
+    var basename = filepath.Base(os.Args[1])
+    var fileExt = filepath.Ext(basename)
+    var name = strings.TrimSuffix(basename, fileExt)
+    var finalPath = filepath.Join(filepath.Dir(os.Args[1]), name + "_fix.png")
+
+    if fileExt == ".png" {
+        loadImagePng(os.Args[1])
+    } else if fileExt == ".tif" || fileExt == ".tiff" {
+        loadImageTiff(os.Args[1])
+    } else {
+        fmt.Println("Invalid file format", fileExt);
         return
     }
 
-    var basename = filepath.Base(os.Args[1])
-    var name = strings.TrimSuffix(basename, filepath.Ext(basename))
-    var finalPath = filepath.Join(filepath.Dir(os.Args[1]), name + "_fix.png")
-
     processImage(os.Args[1], finalPath)
 }
+
+func loadImagePng(path) {
+	// Decode the JPEG data.
+	reader, err := os.Open(pathFrom)
+	if err != nil {
+		fmt.Println(err)
+	}
+	defer reader.Close()
+	m, _, err := image.Decode(reader)
+	if err != nil {
+		fmt.Println(err)
+	}
+}
+
+func loadImageTiff(path) {
+
+}
+
 
 func processImage(pathFrom string, pathTo string) {
     fmt.Printf("Fixing %s -> %s\n", pathFrom, pathTo)
