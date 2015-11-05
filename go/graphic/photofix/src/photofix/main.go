@@ -12,41 +12,6 @@ import (
 	"os"
 )
 
-func CloneToRGBA(src image.Image) draw.Image {
-	b := src.Bounds()
-	dst := image.NewRGBA(b)
-	draw.Draw(dst, b, src, b.Min, draw.Src)
-	return dst
-}
-
-func fixLineError(img draw.Image) {
-	const lineX = 1572
-	const lineY = 1451
-	const dia = 4
-	const dia2 = 1
-    const shiftX = 10
-    const shiftY = 0
-
-	bounds := img.Bounds()
-
-	// fix line
-	for y := lineY + 5; y < bounds.Max.Y; y++ {
-		var left color.RGBA = img.At(lineX-1, y).(color.RGBA)
-		var right color.RGBA = img.At(lineX+1, y).(color.RGBA)
-
-		// simple interpolation
-		img.Set(lineX, y, color.RGBA{(left.R + right.R) / 2, (left.G + right.G) / 2, (left.B + right.B) / 2, 255})
-	}
-
-    // fix point
-	for x := lineX - dia; x <= lineX + dia; x++ {
-		for y := lineY - dia; y <= lineY + dia; y++ {
-            var src color.RGBA = img.At(x + shiftX, y + shiftY).(color.RGBA)
-            img.Set(x, y, color.RGBA{src.R, src.G, src.B, 255})
-        }
-    }
-}
-
 func main() {
     if len(os.Args) < 2 {
         fmt.Println("No images to be processed")
@@ -68,19 +33,21 @@ func main() {
         var filePathFix = filepath.Join(filepath.Dir(filePath), fileNameFix)
 
         if fileExt != ".tif" && fileExt != ".tiff" && fileExt != ".png" {
-            fmt.Println("Invalid file format", fileExt);
-            return
+            fmt.Println("Invalid file format:", fileExt);
+            continue
         }
 
         image := loadImage(filePath)
 
         fmt.Printf("Fixing %s -> %s ... ", fileName, fileNameFix)
 
-        processImage(image)
+        if imageFix, err := processImage(image); err == nil {
+            saveImage(imageFix, filePathFix)
+            fmt.Printf("done.\n")
+        } else {
+            fmt.Println(err)
+        }
 
-        saveImage(image, filePathFix)
-
-        fmt.Printf("done.\n")
     }
 }
 
@@ -97,26 +64,99 @@ func loadImage(path string) *image.Image {
     return &m
 }
 
-func saveImage(image *image.Image, path string) {
+func saveImage(image *draw.Image, path string) {
 	toimg, _ := os.Create(path)
 	defer toimg.Close()
 	png.Encode(toimg, *image)
 }
 
-func processImage(image *image.Image) (*draw.Image, error) {
+// 1 - horizontal , 2- vertical_90, 3 - vertical_270
+func detectOrientation(image *draw.Image) int {
 
     bounds := (*image).Bounds()
 
-    if bounds.Max.X != 3008 || bounds.Max.Y != 2000 {
-        fmt.Println("Invalid image dimensions (%d, %d)", bounds.Max.X, bounds.Max.Y);
-        return nil, fmt.Errorf("Invalid image dimensions (%d, %d)", bounds.Max.X, bounds.Max.Y);
+    // 0 - wrong, 1 - horizontal , 2- vertical
+    orientation := 0
 
+    if (bounds.Max.X == 3008 || bounds.Max.Y == 2000) {
+        orientation = 1
+    } else if (bounds.Max.Y == 3008 || bounds.Max.X == 2000) {
+        // implementation of detection
+        orientation = 2
     }
+
+    return orientation
+}
+
+
+func processImage(image *image.Image) (*draw.Image, error) {
 
 	// make image writeable
 	newImage := CloneToRGBA(*image)
 
-	fixLineError(newImage)
+    var err error
 
-    return &newImage, nil
+    err = fixLineError(&newImage)
+
+    return &newImage, err
 }
+
+func CloneToRGBA(src image.Image) draw.Image {
+	b := src.Bounds()
+	dst := image.NewRGBA(b)
+	draw.Draw(dst, b, src, b.Min, draw.Src)
+	return dst
+}
+
+func fixLineError(image *draw.Image) error {
+	const lineX = 1572
+	const lineY = 1451
+	const dia = 4
+    const shiftX = 10
+    const shiftY = 0
+
+    bounds := (*image).Bounds()
+
+    // 0 - wrong image format, 1 - horizontal , 2- vertical
+    orientation := detectOrientation(image)
+
+    if (orientation == 0) {
+        return fmt.Errorf("Invalid image dimensions (%d, %d)", bounds.Max.X, bounds.Max.Y);
+    }
+
+    // detect left/right in case of vertical orientation
+    if (orientation == 2) {
+        var diffLeft = 0
+        var diffRight = 0
+        var tryLeft color.RGBA = (*image).At(lineY, bounds.Max.Y - lineX).(color.RGBA)
+        var tryRight color.RGBA = (*image).At(bounds.Max.X - lineY, lineX).(color.RGBA)
+
+        for i := 0; i < 3; i++ {
+            tryLeft color.RGBA = (*image).At(lineY + i, bounds.Max.Y - lineX).(color.RGBA)
+            tryRight color.RGBA = (*image).At(bounds.Max.X - lineY - i, lineX).(color.RGBA)
+            
+            fmt.Println(i, tryLeft);
+            fmt.Println(i, tryRight);
+        }
+    }
+
+	// fix line
+	for y := lineY + 5; y < bounds.Max.Y; y++ {
+		var left color.RGBA = (*image).At(lineX-1, y).(color.RGBA)
+		var right color.RGBA = (*image).At(lineX+1, y).(color.RGBA)
+
+		// simple interpolation
+		(*image).Set(lineX, y, color.RGBA{(left.R + right.R) / 2, (left.G + right.G) / 2, (left.B + right.B) / 2, 255})
+	}
+
+    // fix point
+	for x := lineX - dia; x <= lineX + dia; x++ {
+		for y := lineY - dia; y <= lineY + dia; y++ {
+            var src color.RGBA = (*image).At(x + shiftX, y + shiftY).(color.RGBA)
+            (*image).Set(x, y, color.RGBA{src.R, src.G, src.B, 255})
+        }
+    }
+
+    return nil
+}
+
