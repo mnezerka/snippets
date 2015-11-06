@@ -1,16 +1,16 @@
-import Store from 'store'
+import Store from 'store';
 
 class MockStore {
     getData() {
-        return 'MockedData'
+        return 'MockedData';
     }
 }
-require.cache[require.resolve('store')].exports = new MockStore()
-console.log(require.cache[require.resolve('store')].exports)
+require.cache[require.resolve('store')].exports = new MockStore();
+console.log(require.cache[require.resolve('store')].exports);
 //console.log(require.cache[require.resolve('module1')].exports)
 //console.log(require.cache[require.resolve('module1')].exports)
 
-import Module1 from 'module1'
+import Module1 from 'module1';
 
 //console.log(require.cache[require.resolve('axios')].exports = mockAxios;)
 //console.log(require.cache)
@@ -20,6 +20,6 @@ import Module1 from 'module1'
 //require.cache[require.resolve('module1')].exports = MockModule1
 //console.log(require.cache[require.resolve('module1')].exports)
 
-var m1 = new Module1
+var m1 = new Module1();
 
-console.log('Touched is:', m1.touch())
+console.log('Touched is:', m1.touch());
