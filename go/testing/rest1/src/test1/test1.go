@@ -5,8 +5,34 @@ import (
 	"github.com/ant0ine/go-json-rest/rest"
 	"github.com/ant0ine/go-json-rest/rest/test"
 	"log"
+	"net/http"
 	"testing"
 )
+
+func MockHttp() {
+	api := rest.NewApi()
+	api.Use(rest.DefaultDevStack...)
+	var user map[string]string = map[string]string{
+		"id":         "123",
+		"first_name": "Bela",
+		"last_name":  "Fleck"}
+
+	var users []int = []int{123, 124, 125}
+
+	router, err := rest.MakeRouter(
+		rest.Get("/user", func(w rest.ResponseWriter, r *rest.Request) {
+			w.WriteJson(user)
+		}),
+		rest.Get("/users", func(w rest.ResponseWriter, r *rest.Request) {
+			w.WriteJson(users)
+		}),
+	)
+	if err != nil {
+		log.Fatal(err)
+	}
+	api.SetApp(router)
+	log.Fatal(http.ListenAndServe(":8080", api.MakeHandler()))
+}
 
 func TestSimpleRequest(t *testing.T) {
 	api := rest.NewApi()
@@ -43,4 +69,7 @@ func TestSimpleRequest(t *testing.T) {
 }
 
 func main() {
+	fmt.Println("Starting ...")
+	MockHttp()
+	fmt.Println("Done")
 }
