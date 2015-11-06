@@ -12,6 +12,35 @@ import (
 	"os"
 )
 
+func abs(i int) int {
+    if (i < 0) {
+        return -i
+    }
+    return i
+}
+
+func diffColors(p1 color.RGBA, p2 color.RGBA) int {
+    var diff int = 0
+    diff += abs(int(p1.R) - int(p2.R))
+    diff += abs(int(p1.G) - int(p2.G))
+    diff += abs(int(p1.B) - int(p2.B))
+    return diff
+}
+
+func rotatePt(p image.Point, imgSize image.Rectangle, angle uint) image.Point {
+    var result image.Point = p
+
+    if angle == 90 {
+        result.X = p.Y
+        result.Y = imgSize.Max.Y - 1 - p.X
+    } else if angle == 270 {
+        result.X = imgSize.Max.X - 1 - p.Y
+        result.Y = p.X
+    }
+
+    return result
+}
+
 func main() {
     if len(os.Args) < 2 {
         fmt.Println("No images to be processed")
@@ -72,7 +101,6 @@ func saveImage(image *draw.Image, path string) {
 
 // 1 - horizontal , 2- vertical_90, 3 - vertical_270
 func detectOrientation(image *draw.Image) int {
-
     bounds := (*image).Bounds()
 
     // 0 - wrong, 1 - horizontal , 2- vertical
@@ -88,15 +116,13 @@ func detectOrientation(image *draw.Image) int {
     return orientation
 }
 
-
 func processImage(image *image.Image) (*draw.Image, error) {
-
 	// make image writeable
 	newImage := CloneToRGBA(*image)
 
     var err error
 
-    err = fixLineError(&newImage)
+    err = fixLineError(image, &newImage)
 
     return &newImage, err
 }
@@ -108,55 +134,97 @@ func CloneToRGBA(src image.Image) draw.Image {
 	return dst
 }
 
-func fixLineError(image *draw.Image) error {
+func fixLineError(imgOrig *image.Image, img *draw.Image) error {
 	const lineX = 1572
 	const lineY = 1451
 	const dia = 4
     const shiftX = 10
     const shiftY = 0
 
-    bounds := (*image).Bounds()
+    // distance to be used for checking colour of surrounding pixels
+    const shiftCheck = 3
+
+    bounds := (*img).Bounds()
 
     // 0 - wrong image format, 1 - horizontal , 2- vertical
-    orientation := detectOrientation(image)
+    orientation := detectOrientation(img)
 
     if (orientation == 0) {
         return fmt.Errorf("Invalid image dimensions (%d, %d)", bounds.Max.X, bounds.Max.Y);
     }
 
+    var angle uint = 0
+
     // detect left/right in case of vertical orientation
     if (orientation == 2) {
-        var diffLeft = 0
-        var diffRight = 0
-        var tryLeft color.RGBA = (*image).At(lineY, bounds.Max.Y - lineX).(color.RGBA)
-        var tryRight color.RGBA = (*image).At(bounds.Max.X - lineY, lineX).(color.RGBA)
+        var diffLeft int = 0
+        var diffRight int = 0
 
-        for i := 0; i < 3; i++ {
-            tryLeft color.RGBA = (*image).At(lineY + i, bounds.Max.Y - lineX).(color.RGBA)
-            tryRight color.RGBA = (*image).At(bounds.Max.X - lineY - i, lineX).(color.RGBA)
-            
-            fmt.Println(i, tryLeft);
-            fmt.Println(i, tryRight);
+        var checkStartL = image.Pt(lineY, bounds.Max.Y - lineX - 1)
+        var checkStartR = image.Pt(bounds.Max.X - lineY - 1, lineX)
+
+        for i := 0; i < 10; i++ {
+            var l color.RGBA = (*img).At(checkStartL.X + i, checkStartL.Y).(color.RGBA)
+            var l2 color.RGBA = (*img).At(checkStartL.X + i, checkStartL.Y + shiftCheck).(color.RGBA)
+            var r color.RGBA = (*img).At(checkStartR.X + i, checkStartR.Y).(color.RGBA)
+            var r2 color.RGBA = (*img).At(checkStartR.X + i, checkStartR.Y + shiftCheck).(color.RGBA)
+
+            diffLeft += diffColors(l, l2)
+            diffRight += diffColors(r, r2)
+        }
+        if (diffLeft > diffRight) {
+            angle = 90
+            fmt.Print("left rotation detected ...")
+        } else {
+            angle = 270
+            fmt.Print("right rotation detected ...")
         }
     }
 
 	// fix line
-	for y := lineY + 5; y < bounds.Max.Y; y++ {
-		var left color.RGBA = (*image).At(lineX-1, y).(color.RGBA)
-		var right color.RGBA = (*image).At(lineX+1, y).(color.RGBA)
+	for y := lineY + 5; y <= 2000; y++ {
+	    for x := 2; x >= 0; x-- {
+            pt := rotatePt(image.Pt(lineX + x, y), bounds, angle)
+            ptPick := rotatePt(image.Pt(pt.X + 3, pt.Y), bounds, angle)
+            colorPick := (*imgOrig).At(ptPick.X, ptPick.Y)
+		    (*img).Set(pt.X, pt.Y, colorPick)
+        }
 
-		// simple interpolation
-		(*image).Set(lineX, y, color.RGBA{(left.R + right.R) / 2, (left.G + right.G) / 2, (left.B + right.B) / 2, 255})
+	    for x := -2; x < 0; x++ {
+            pt := rotatePt(image.Pt(lineX + x, y), bounds, angle)
+            ptPick := rotatePt(image.Pt(pt.X - 3, pt.Y), bounds, angle)
+            colorPick := (*imgOrig).At(ptPick.X, ptPick.Y)
+		    (*img).Set(pt.X, pt.Y, colorPick)
+        }
+
+        /*
+
+        // pick left and right colors
+        ptLeftPick := rotatePt(image.Pt(lineX-2, y), bounds, angle)
+        ptRightPick := rotatePt(image.Pt(lineX+2, y), bounds, angle)
+        left  := (*img).At(ptLeftPick.X, ptLeftPick.Y).(color.RGBA)
+        right := (*img).At(ptRightPick.X, ptRightPick.Y).(color.RGBA)
+
+		// simple interpolation of 3 pixels
+        ptCenter := rotatePt(image.Pt(lineX, y), bounds, angle)
+        ptLeft := rotatePt(image.Pt(lineX - 1, y), bounds, angle)
+        ptRight := rotatePt(image.Pt(lineX + 1, y), bounds, angle)
+
+		(*img).Set(ptCenter.X, ptCenter.Y, color.RGBA{(left.R + right.R) / 2, (left.G + right.G) / 2, (left.B + right.B) / 2, 255})
+		(*img).Set(ptLeft.X, ptLeft.Y, color.RGBA{(left.R + right.R) / 2, (left.G + right.G) / 2, (left.B + right.B) / 2, 255})
+		(*img).Set(ptRight.X, ptRight.Y, color.RGBA{(left.R + right.R) / 2, (left.G + right.G) / 2, (left.B + right.B) / 2, 255})
+        */
 	}
 
     // fix point
 	for x := lineX - dia; x <= lineX + dia; x++ {
 		for y := lineY - dia; y <= lineY + dia; y++ {
-            var src color.RGBA = (*image).At(x + shiftX, y + shiftY).(color.RGBA)
-            (*image).Set(x, y, color.RGBA{src.R, src.G, src.B, 255})
+            pt := rotatePt(image.Pt(x, y), bounds, angle)
+            ptShifted := rotatePt(image.Pt(x + shiftX, y + shiftY), bounds, angle)
+            src := (*img).At(ptShifted.X, ptShifted.Y).(color.RGBA)
+            (*img).Set(pt.X, pt.Y, color.RGBA{src.R, src.G, src.B, 255})
         }
     }
-
     return nil
 }
 
