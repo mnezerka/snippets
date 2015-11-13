@@ -9,6 +9,19 @@ import (
 	"testing"
 )
 
+func handler(w http.ResponseWriter, r *http.Request) {
+    fmt.Fprintf(w, "Hi there, I love %s!", r.URL.Path[1:])
+}
+
+func main() {
+	fmt.Println("Starting http server ...")
+	//MockHttp()
+    http.HandleFunc("/", handler)
+    http.ListenAndServe("127.0.0.1:9001", nil)
+	fmt.Println("Done")
+}
+
+
 func MockHttp() {
 	api := rest.NewApi()
 	api.Use(rest.DefaultDevStack...)
@@ -68,8 +81,3 @@ func TestSimpleRequest(t *testing.T) {
 	recorded.ContentTypeIsJson()
 }
 
-func main() {
-	fmt.Println("Starting ...")
-	MockHttp()
-	fmt.Println("Done")
-}
