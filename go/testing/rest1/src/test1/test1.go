@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	//"mock_http_server"
 )
 
 func main() {
