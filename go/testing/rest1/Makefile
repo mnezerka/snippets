@@ -1,6 +1,6 @@
 build: bin/mock_http_server
 
-bin/mock_http_server:
+bin/mock_http_server: src/mock_http_server/server.go
 	go install mock_http_server
 
 run: build

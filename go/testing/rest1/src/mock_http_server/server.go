@@ -1,66 +1,78 @@
 package main
 
 import (
+	"container/list"
 	"fmt"
+	"log"
+	"net"
 	"net/http"
 )
 
+// server instance singleton
 var server *MockHttpServer = NewMockHttpServer()
 
 type MockHttpServer struct {
 	reqCounter int
-	endPoints  []HttpEndPoint
-}
-
-type HttpEndPoint struct {
-	id      string
-	addr    string
-	port    int
-	handler http.Handler
-}
-
-type Step struct {
-	url      string
-	response string
-}
-
-type Scenario struct {
-	steps []Step
+	endPoints  list.List
 }
 
 func NewMockHttpServer() *MockHttpServer {
 	s := new(MockHttpServer)
+	//s.endPoints = list.New()
 	s.reqCounter = 0
 	return s
 }
 
-func (this *MockHttpServer) addEndPoint(id string, addr string, port int) error {
-
-	e := new(HttpEndPoint)
-	e.id = id
-	e.addr = addr
-	e.port = port
-
-	return nil
+func (this *MockHttpServer) getEndPoint(id string) *MockEndPoint {
+	var result *MockEndPoint = nil
+	for e := this.endPoints.Front(); e != nil; e = e.Next() {
+		if e.Value.(*MockEndPoint).id == id {
+			result = e.Value.(*MockEndPoint)
+			break
+		}
+	}
+	return result
 }
 
-func Handler(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintf(w, "Hi there, I love %s!", r.URL.Path[1:])
-	fmt.Println("http:path", r.URL.Path)
-	fmt.Println("http:query", r.URL.RawQuery)
-	fmt.Println("http:method", r.Method)
-	fmt.Println("http:counter", server.reqCounter)
-	server.reqCounter++
+func HandlerEndPoint(w http.ResponseWriter, r *http.Request) {
+	if r.Method == "POST" {
+		log.Print("Creating new endpoint")
+
+		ln, err := net.Listen("tcp", ":8081")
+		if err == nil {
+			handler := http.NewServeMux()
+			ep := NewMockEndPoint("test", "testaddr", 8081, handler, ln)
+			go http.Serve(ln, ep)
+			server.endPoints.PushBack(ep)
+			log.Print("Endpoint added")
+		} else {
+			log.Printf("Can't listen: %s", err)
+		}
+
+	} else if r.Method == "DELETE" {
+		log.Print("Removing endpoint")
+		if ep := server.getEndPoint("test"); ep != nil {
+			log.Print("Removing endpoint that has been found")
+			err := ep.listener.Close()
+			log.Print(err)
+		}
+	} else {
+		fmt.Println("mockhttp:dump endpoint info")
+	}
 }
 
-func HandlerConfig(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("http:config called")
-	fmt.Println("http:path", r.URL.Path)
+func HandlerRoot(w http.ResponseWriter, r *http.Request) {
+	fmt.Fprintf(w, "This is instance of Mock Http Server")
+	for e := server.endPoints.Front(); e != nil; e = e.Next() {
+		//ep := *MockEndPoint(e.Value)
+		//fmt.Fprintf(w, "EndPoint: %s %s:%d", e.Value.id, e.Value.addr, e.Value.port)
+		fmt.Fprintf(w, "EndPoint: %#v", e.Value)
+	}
 }
 
 func main() {
-	fmt.Println("Starting")
-	http.HandleFunc("/mockconf", HandlerConfig)
-	http.HandleFunc("/", Handler)
+	log.Print("Starting")
+	http.HandleFunc("/endpoint", HandlerEndPoint)
+	http.HandleFunc("/", HandlerRoot)
 	http.ListenAndServe(":8080", nil)
 }
