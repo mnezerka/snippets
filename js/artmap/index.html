@@ -14,96 +14,105 @@
           overflow: auto;
           position: relative;
       }
+      .item {
+          border-left: 1px solid red;
+          border-top: 1px solid red;
+          font-size: 10px;
+          background-color: #ddd;
+          padding: 2px;
+      }
     </style>
   </head>
   <body>
     <div id="map"></div>
     <script type="text/javascript" async defer>
 
-    function initMap(bounds, imageUrl) {
-        var map = {
-            el: null,
-            elImg: null,
-            bounds: null,
-            items: [],
-            ready: false
-        }
-        map.el = document.getElementById('map');
+    function Map(bounds, imageUrl) {
+        this.bounds = bounds;
+        this.imageUrl = imageUrl;
+        this.el = null;
+        this.elImg = null;
+        this.items = [];
+        this.ready = false;
+    }
+
+
+    Map.prototype.init = function () {
+
+        this.el = document.getElementById('map');
         //map.el.addEventListener('click', hello);
 
-        map.elImg = document.createElement('img');
-        map.elImg.onload = _onInitMapLoadImg.bind(map);
+        this.elImg = document.createElement('img');
+        this.elImg.onload = this._onInitMapLoadImg.bind(this);
+        this.elImg.setAttribute('src', this.imageUrl);
+        this.elImg.setAttribute('alt', 'Mapa');
 
-        map.bounds = bounds;
-
-        map.elImg.setAttribute('src', imageUrl);
-        map.elImg.setAttribute('alt', 'Mapa');
-
-        map.el.appendChild(map.elImg);
-   
-        return map;
+        this.el.appendChild(map.elImg);
     }
 
-    function _onInitMapLoadImg(mapx, map2) {
+    Map.prototype._onInitMapLoadImg = function () {
         this.ready = true;
-        this.width = map.elImg.scrollWidth;
-        this.height = map.elImg.scrollHeight;
-        drawItems(this);
+        this.width = this.elImg.scrollWidth;
+        this.height = this.elImg.scrollHeight;
+        this.drawItems(this);
     }
 
-    function drawItems(map) {
-        if (!map.ready) {
+    Map.prototype.drawItems = function() {
+        if (!this.ready) {
             return;
         }
 
-        console.log('drawItems', map.elImg.scrollWidth, map.elImg.scrollHeight);
+        for (i = 0; i < this.items.length; i++) {
+            item = this.items[i];
 
-        for (i = 0; i < map.items.length; i++) {
-            item = map.items[i];
-
-            var pos = locToPos(map, item.loc);
+            var pos = this.locToPos(item.loc);
 
             m1 = document.createElement('div');
+            m1.className = 'item';
             m1.style.position = 'absolute';
-            m1.style.backgroundColor = 'blue';
-            m1.style.color = 'red';
             m1.style.left = pos.x + 'px';
             m1.style.top = pos.y + 'px';
             m1.innerHTML = item.title;
-            map.el.appendChild(m1);
+            this.el.appendChild(m1);
         }
     }
 
-    function locToPos(map, loc) {
+    Map.prototype.locToPos = function (loc) {
+        var result = { x: null, y: null };
 
-        if (!map.ready) {
+        if (!this.ready) {
             return;
         }
 
-        //h   p1: {lat: 49.222639, lng: 16.548087},
-        console.log(map.bounds.p1, map.bounds.p2);
-        //latDiff = Math.abs(map.bounds.p2.lat - map.bounds.p1.lat));
-        //lngDiff = Math.abs(map.bounds.p2.lng - map.bounds.p1.lng));
+        var latDiff = map.bounds.p2.lat - map.bounds.p1.lat;
+        var lngDiff = map.bounds.p2.lng - map.bounds.p1.lng;
 
-        //locLatDelta = map.width / 2; 
-        //locLatDelta = map.width / 2; 
-                     
-        return {x: map.width / 2, y: map.height / 2};
+        // check if loc is in bounds
+        if (loc.lat < map.bounds.p1.lat || loc.lat > map.bounds.p2.lat) 
+            return result;
+        if (loc.lng < map.bounds.p1.lng || loc.lng > map.bounds.p2.lng) 
+            return result;
+
+        result.y = ((loc.lat - map.bounds.p1.lat) / latDiff) * map.height;
+        result.x = ((loc.lng - map.bounds.p1.lng) / lngDiff) * map.width;
+        result.y = map.height - result.y;
+
+        return result;
     }
 
-    function addMarker(map, title, loc) {
-
-        map.items.push({title, loc});
-
+    Map.prototype.addMarker = function(title, loc) {
+        this.items.push({title, loc});
     }
 
     var mapBounds = {
-        p1: {lat: 49.222639, lng: 16.548087},
-        p2: {lat: 49.219346, lng: 16.560740}}
+        p1: {lat: 49.216389, lng: 16.548087},
+        p2: {lat: 49.222717, lng: 16.562419}
+    };
 
-    var map = initMap(mapBounds, 'komin1.png');
-
-    addMarker(map, 'Tady', {lat: 49.220234, lng: 16.555830});
+    var map = new Map(mapBounds, 'komin1.png');
+    map.addMarker('Tady', {lat: 49.220234, lng: 16.555830});
+    map.addMarker('Cross', {lat: 49.217934, lng: 16.553585});
+    map.init();
     
     </script>
   </body>
