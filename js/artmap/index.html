@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <style type="text/css">
+      html, body {
+          /*height: 100%; */
+          margin: 20px;
+          padding: 0;
+          background-color: #666; }
+      #mapx { height: 100%; }
+      #map {
+          width: 100%;
+          height: 100%;
+          overflow: auto;
+          position: relative;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="map"></div>
+    <script type="text/javascript" async defer>
+
+    function initMap(bounds, imageUrl) {
+        var map = {
+            el: null,
+            elImg: null,
+            bounds: null,
+            items: [],
+            ready: false
+        }
+        map.el = document.getElementById('map');
+        //map.el.addEventListener('click', hello);
+
+        map.elImg = document.createElement('img');
+        map.elImg.onload = _onInitMapLoadImg.bind(map);
+
+        map.bounds = bounds;
+
+        map.elImg.setAttribute('src', imageUrl);
+        map.elImg.setAttribute('alt', 'Mapa');
+
+        map.el.appendChild(map.elImg);
+   
+        return map;
+    }
+
+    function _onInitMapLoadImg(mapx, map2) {
+        this.ready = true;
+        this.width = map.elImg.scrollWidth;
+        this.height = map.elImg.scrollHeight;
+        drawItems(this);
+    }
+
+    function drawItems(map) {
+        if (!map.ready) {
+            return;
+        }
+
+        console.log('drawItems', map.elImg.scrollWidth, map.elImg.scrollHeight);
+
+        for (i = 0; i < map.items.length; i++) {
+            item = map.items[i];
+
+            var pos = locToPos(map, item.loc);
+
+            m1 = document.createElement('div');
+            m1.style.position = 'absolute';
+            m1.style.backgroundColor = 'blue';
+            m1.style.color = 'red';
+            m1.style.left = pos.x + 'px';
+            m1.style.top = pos.y + 'px';
+            m1.innerHTML = item.title;
+            map.el.appendChild(m1);
+        }
+    }
+
+    function locToPos(map, loc) {
+
+        if (!map.ready) {
+            return;
+        }
+
+        //h   p1: {lat: 49.222639, lng: 16.548087},
+        console.log(map.bounds.p1, map.bounds.p2);
+        //latDiff = Math.abs(map.bounds.p2.lat - map.bounds.p1.lat));
+        //lngDiff = Math.abs(map.bounds.p2.lng - map.bounds.p1.lng));
+
+        //locLatDelta = map.width / 2; 
+        //locLatDelta = map.width / 2; 
+                     
+        return {x: map.width / 2, y: map.height / 2};
+    }
+
+    function addMarker(map, title, loc) {
+
+        map.items.push({title, loc});
+
+    }
+
+    var mapBounds = {
+        p1: {lat: 49.222639, lng: 16.548087},
+        p2: {lat: 49.219346, lng: 16.560740}}
+
+    var map = initMap(mapBounds, 'komin1.png');
+
+    addMarker(map, 'Tady', {lat: 49.220234, lng: 16.555830});
+    
+    </script>
+  </body>
+</html>

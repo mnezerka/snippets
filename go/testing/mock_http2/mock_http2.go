@@ -2,11 +2,20 @@ package main
 
 import (
 	"fmt"
-	"log"
 	"net/http"
-	"net/http/httptest"
 )
 
+func handler(w http.ResponseWriter, r *http.Request) {
+    fmt.Fprintf(w, "Hi there, I love %s!", r.URL.Path[1:])
+}
+
+func main() {
+    http.HandleFunc("/", handler)
+    http.ListenAndServe(":8080", nil)
+}
+
+
+/*
 func main() {
 	handler := func(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "something failed", http.StatusInternalServerError)
@@ -22,3 +31,4 @@ func main() {
 	handler(w, req)
 	fmt.Printf("second <%d> - <%s>", w.Code, w.Body.String())
 }
+*/
